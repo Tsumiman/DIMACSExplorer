@@ -4,6 +4,8 @@
 #include <QStringList>
 #include <QDebug>
 
+#include <unordered_set>
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -48,10 +50,14 @@ void MainWindow::onMousePress(QMouseEvent *ev)
 {
     auto item = this->ui->plot->itemAt(ev->pos(), true);
     auto ellipse = dynamic_cast<QCPItemEllipse*>(item);
-    qDebug()<<ellipse;
     if (ellipse) {
         drag = ellipse;
         this->ui->plot->setInteraction(QCP::iRangeDrag, false);
+        for (auto& p: vertices) {
+            if (p.second == drag) {
+                drag_id = p.first;
+            }
+        }
     }
 }
 
@@ -63,8 +69,15 @@ void MainWindow::onMouseMove(QMouseEvent *ev)
             ui->plot->yAxis->pixelToCoord(ev->pos().y())
         );
         drag->topLeft->setCoords(pos + QPointF(0.02, 0.02));
-
         drag->bottomRight->setCoords(pos - QPointF(0.02, 0.02));
+        for (auto& p: vertices) {
+            auto id = p.first;
+            auto pos = (drag->bottomRight->coords() + p.second->bottomRight->coords() + drag->topLeft->coords() + p.second->topLeft->coords())/4 + QPointF(0, 0.1);
+            auto label = labels[id][drag_id]?labels[id][drag_id]:(labels[drag_id][id]?labels[drag_id][id]:nullptr);
+            if (label) {
+                label->position->setCoords(pos);
+            }
+        }
     }
     if (ev->buttons() & Qt::RightButton) {
         auto delta = ev->pos() - last_pos;
@@ -91,8 +104,13 @@ void MainWindow::clearGraph()
     for (auto& vertex: vertices) {
         ui->plot->removeItem(vertex.second);
     }
+    for (auto& vedges: labels) for (auto& edge: vedges) {
+        if (edge) ui->plot->removeItem(edge);
+    }
     vertices.clear();
     edges.clear();
+    int_edges.clear();
+    labels.clear();
 }
 
 void MainWindow::createNewGraph(const int V, const int E)
@@ -101,7 +119,11 @@ void MainWindow::createNewGraph(const int V, const int E)
     double angle = 2*M_PI/V;
     vertices.clear();
     edges.clear();
+    int_edges.clear();
+
+    int_edges.resize(V, std::vector<int>(V, 0));
     std::fill_n(std::back_inserter(edges), E, std::vector<QCPItemLine*>(E, nullptr));
+    labels = std::vector<std::vector<QCPItemText*>>(E, std::vector<QCPItemText*>(E, nullptr));
     std::generate_n(std::back_inserter(vertices), V, [&](){
         int N = static_cast<int>(vertices.size());
         QPointF position = rotate(initial, N*angle);
@@ -118,11 +140,15 @@ void MainWindow::createNewGraph(const int V, const int E)
 
 void MainWindow::addGraphEdge(const int V, const int U)
 {
-    auto edge = edges[V][U] = new QCPItemLine(this->ui->plot);
+    QCPItemLine* edge = edges[V][U] = new QCPItemLine(this->ui->plot);
+    QCPItemText* label = labels[V][U] = new QCPItemText(this->ui->plot);
     edge->start->setParentAnchor(this->vertices[V].second->center);
     edge->end->setParentAnchor(this->vertices[U].second->center);
     edge->setLayer(this->ui->plot->layer("background"));
     edge->setSelectable(false);
+    //label->setText("Test" + QString::number(V*100+U));
+    int_edges[V][U] = 1;
+    int_edges[U][V] = 1;
 }
 
 void MainWindow::replotGraph()
@@ -165,6 +191,56 @@ void MainWindow::loadGraph(const QString &filename)
     while (!in.atEnd()) {
         QString line = in.readLine();
         parseLine(line);
+    }
+    int min_val = int_edges.size();
+    for(int i = 0; i < vertices.size(); ++i)
+    {
+        std::unordered_set<int> nbs_i;
+        for(int j = 0; j < int_edges[i].size(); ++j)
+            if(int_edges[i][j])
+            {
+                //qDebug() << i << " has a neihbor " << j;
+                nbs_i.insert(j);
+            }
+
+        // super ugly
+        for(int j = i+1; j < vertices.size(); ++j)
+            if(labels[i][j])
+            {
+                // calculate |N(i) \cup N(j)|
+                int val = 0;
+                for(int k = 0; k < int_edges[j].size(); ++k)
+                    if(int_edges[j][k] && nbs_i.count(k) > 0)
+                        val++;
+                if(val < min_val)
+                    min_val = val;
+            }
+    }
+
+    qDebug() << min_val;
+
+    for(int i = 0; i < vertices.size(); ++i)
+    {
+        std::unordered_set<int> nbs_i;
+        for(int j = 0; j < int_edges[i].size(); ++j)
+            if(int_edges[i][j])
+            {
+                //qDebug() << i << " has a neihbor " << j;
+                nbs_i.insert(j);
+            }
+
+        for(int j = i+1; j < vertices.size(); ++j)
+            if(labels[i][j])
+            {
+                // calculate |N(i) \cup N(j)|
+                int val = 0;
+                for(int k = 0; k < int_edges[j].size(); ++k)
+                    if(int_edges[j][k] && nbs_i.count(k) > 0)
+                        val++;
+                labels[i][j]->setText(QString::number(val));
+                if(val == min_val)
+                    labels[i][j]->setBrush(QBrush(QColor(255, 100, 100)));
+            }
     }
     this->ui->plot->replot();
 }

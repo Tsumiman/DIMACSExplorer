@@ -8,6 +8,7 @@
 class QCPGraph;
 class QCPItemLine;
 class QCPItemEllipse;
+class QCPItemText;
 class QCPAbstractItem;
 
 namespace Ui {
@@ -31,9 +32,12 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    std::vector<std::pair<int, QCPItemEllipse*>> vertices;
-    std::vector<std::vector<QCPItemLine*>> edges;
+    std::vector<std::pair<int, QCPItemEllipse*> > vertices;
+    std::vector<std::vector<QCPItemLine*> > edges;
+    std::vector<std::vector<int> > int_edges;
+    std::vector<std::vector<QCPItemText*> > labels;
     QCPItemEllipse *drag;
+    int drag_id;
     QPointF last_pos;
 
     void clearGraph();
