@@ -1,14 +1,14 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2018-11-18T21:16:00
+# Project created by QtCreator 2019-01-12T23:22:00
 #
 #-------------------------------------------------
 
-QT       += core gui printsupport widgets
+QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = DIMACSExplorer
+TARGET = Source
 TEMPLATE = app
 
 # The following define makes your compiler emit warnings if you use
@@ -26,11 +26,27 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-    qcustomplot/qcustomplot.cpp
+    items/qgraphicsvertexitem.cpp \
+    items/qgraphicsedgeitem.cpp \
+    graph/graph.cpp \
+    graph/edge.cpp \
+    graph/vertex.cpp \
+    items/qgraphicsalignedtextitem.cpp \
+    widgets/qgraphview.cpp \
+    statistics/edgestatistic.cpp \
+    statistics/commonneighborhoodstatistic.cpp
 
 HEADERS += \
         mainwindow.h \
-    qcustomplot/qcustomplot.h
+    items/qgraphicsvertexitem.h \
+    items/qgraphicsedgeitem.h \
+    graph/graph.h \
+    graph/edge.h \
+    graph/vertex.h \
+    items/qgraphicsalignedtextitem.h \
+    widgets/qgraphview.h \
+    statistics/edgestatistic.h \
+    statistics/commonneighborhoodstatistic.h
 
 FORMS += \
         mainwindow.ui
