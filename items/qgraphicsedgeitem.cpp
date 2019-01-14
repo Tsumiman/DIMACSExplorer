@@ -32,6 +32,10 @@ void QGraphicsEdgeItem::prepareTextBlob()
     eli->setRect(-10, -10, 20, 20);
     eli->setBrush(QBrush(Qt::white));
     eli->setPen(QPen(QBrush(Qt::blue), 2));
+
+    textblob->setZValue(DefaultBlobZValue);
+    eli->setZValue(DefaultBlobZValue);
+    text->setZValue(DefaultTextZValue);
 }
 
 QGraphicsEdgeItem::QGraphicsEdgeItem(Edge *model): QGraphicsLineItem(), model(model)

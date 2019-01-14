@@ -13,6 +13,8 @@ class QGraphicsVertexItem : public QGraphicsEllipseItem
     Vertex* m_model;
     static const int DefaultRadius = 15;
     static const int DefaultZValue = 1;
+    static const int DefaultBlobZValue = 5;
+    static const int DefaultTextZValue = 6;
     static const QBrush DefaultBrush;
     static const QBrush SelectedBrush;
     static const QBrush HoverBrush;

@@ -31,6 +31,10 @@ void QGraphicsVertexItem::prepareTextBlob()
     eli->setRect(-7, -7, 14, 14);
     eli->setBrush(QBrush(Qt::white));
     eli->setPen(QPen(QBrush(Qt::blue), 2));
+
+    textblob->setZValue(DefaultBlobZValue);
+    eli->setZValue(DefaultBlobZValue);
+    text->setZValue(DefaultTextZValue);
 }
 
 QGraphicsVertexItem::QGraphicsVertexItem(Vertex* model): QGraphicsVertexItem(model, QPointF(0, 0))

@@ -13,7 +13,9 @@ class QGraphicsEdgeItem : public QGraphicsLineItem
 {
 private:
     Edge* model;
-    static const int DefaultZValue = -1;
+    static const int DefaultZValue = -10;
+    static const int DefaultBlobZValue = -5;
+    static const int DefaultTextZValue = -4;
     static const QPen DefaultPen;
     QGraphicsItemGroup* textblob;
     QGraphicsAlignedTextItem *text;
